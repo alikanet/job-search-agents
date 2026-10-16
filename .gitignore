@@ -1,0 +1,19 @@
+# Personal files created from the templates. Keep these out of Git if you
+# publish your own copy of this repo.
+profile.json
+**/knowledge/*
+!**/knowledge/*.example.md
+**/output/
+**/debriefs/
+interview-prep-agent/CLAUDE.md
+interview-prep-agent/story_bank.md
+interview-prep-agent/exit_answer.md
+interview-prep-agent/.mcp.json
+*.local.json
+
+# Generated documents and secrets
+*.docx
+*.pdf
+.env
+*.token
+__pycache__/
