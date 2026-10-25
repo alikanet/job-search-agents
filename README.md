@@ -80,7 +80,12 @@ docs/
 prompts/                        Copy-and-paste prompts that work in any AI chat
 cv-cover-letter-agent/          The CV and cover letter agent (Python script plus templates)
 interview-prep-agent/           The interview prep agent (Claude Code project plus templates)
+tracker/                        Database of your applications and interviews, shared by both agents
 ```
+
+## Tracking applications and interviews
+
+Both agents record what they do in a small database on your computer (`tracker/job_search.db`): each application and its status, each interview, who interviewed you, what they asked, and which stories you told. The interview prep agent uses it so it never tells an interviewer the same story twice. See the [tracker README](tracker/README.md) to list your applications or update them yourself.
 
 ## Privacy
 

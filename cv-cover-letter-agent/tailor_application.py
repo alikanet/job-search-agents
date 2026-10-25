@@ -27,6 +27,8 @@ import glob
 import json
 import os
 import re
+import sqlite3
+import sys
 from datetime import datetime
 
 from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
@@ -35,6 +37,10 @@ from docx import Document
 from docx.shared import Pt, Inches, RGBColor
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+
+# The job search tracker shared with the interview prep agent.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tracker"))
+import jobdb
 
 NAVY = RGBColor(0x1F, 0x38, 0x64)
 DARK_TEXT = RGBColor(0x22, 0x22, 0x22)
@@ -522,6 +528,26 @@ def save_outputs(data, profile):
     print(f"  {os.path.abspath(letter_path)}")
     print("Review every claim before you apply.")
     print("=" * 60)
+    return folder
+
+
+def track_application(data, website, job_spec, folder):
+    """Record the draft in the job search tracker. The documents are already
+    saved, so a tracker problem is reported but never stops the run."""
+    try:
+        conn = jobdb.connect()
+        try:
+            app_id, created = jobdb.record_draft(
+                conn, data["company_name"], data["role_title"], website or None, job_spec, folder
+            )
+        finally:
+            conn.close()
+    except (sqlite3.Error, OSError) as e:
+        print(f"Note: this application was not added to the tracker ({e}).")
+        return
+    print(f"{'Recorded' if created else 'Updated'} application #{app_id} in the tracker.")
+    print(f"When you send it, run: python ../tracker/jobdb.py status {app_id} applied")
+    print("(use python3 instead of python on Mac or Linux)")
 
 
 # ---------------------------------------------------------------------------
@@ -569,10 +595,12 @@ async def main():
             final_data, problem = extract_final_json(full_text)
             if final_data is not None:
                 try:
-                    save_outputs(final_data, profile)
-                    break
+                    folder = save_outputs(final_data, profile)
                 except (KeyError, TypeError, AttributeError) as e:
                     problem = f"it is missing a field or has one in the wrong shape ({type(e).__name__}: {e})"
+                else:
+                    track_application(final_data, website, job_spec, folder)
+                    break
 
             if problem and retries < MAX_FINAL_JSON_RETRIES:
                 retries += 1

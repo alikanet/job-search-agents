@@ -98,9 +98,21 @@ Interview stages the agent understands: recruiter screen, hiring manager, panel,
 
 The agent will research the company, then write a PDF into `output/` named like `Company_Role_Stage_2026-01-15.pdf`. If it asks to install a tool to make PDFs, allow it. It will tell you which facts it could not verify (marked `[unverified]`) and which story fits are weak.
 
+It also records the interview in the [job search tracker](../tracker/README.md) and checks which stories this company's interviewers have already heard. The first time, Claude Code asks permission to run `jobdb.py`. Allow it.
+
 ## Step 4: After the interview
 
-Copy `debrief_template.md` into the `debriefs` folder, rename it with the date, company and stage (for example `2026-01-15_ExampleCo_HiringManager.md`), and fill it in within 24 hours. The agent reads every debrief for the same company and all from the last 90 days, so it can avoid repeating a story with the same interviewer and follow up on feedback.
+Within 24 hours, while it is fresh, start Claude Code in this folder and type `/debrief` followed by rough notes: who interviewed you, what they asked, which stories you used, how each landed, and what happens next. For example:
+
+```
+/debrief ExampleCo hiring manager interview on 2026-01-15 with Jane Smith (Head of Delivery). Asked about a failing project, I used the warehouse story and it landed well. Asked about a stakeholder conflict, my answer was weak. Overall 4 out of 5. Next round expected in a week.
+```
+
+The agent writes a debrief file into `debriefs/` following `debrief_template.md`, and records the questions, stories, interviewers and how it felt in the tracker. If you would rather fill in the template yourself, copy `debrief_template.md` into `debriefs/`, rename it with the date, company and stage (for example `2026-01-15_ExampleCo_HiringManager.md`), fill it in, then run `/debrief debriefs/2026-01-15_ExampleCo_HiringManager.md` to record it.
+
+When you hear the result, tell Claude Code (for example "ExampleCo offered me the job, update the tracker"), or run `python ../tracker/jobdb.py update-interview <interview number> --outcome offer` yourself (`progressed`, `rejected` and `withdrew` also work).
+
+`/prep` reads every debrief for the same company and all from the last 90 days, and checks the tracker, so it can avoid repeating a story with the same interviewer and follow up on feedback.
 
 ## Keeping it current
 
@@ -112,3 +124,4 @@ When your CV changes, update `knowledge/cv_master.md`, the fact sheet in `CLAUDE
 - **The agent says a knowledge file is missing:** check `knowledge/cv_master.md`, `knowledge/cv_style_guide.md` and `knowledge/cover_letter_style_guide.md` exist.
 - **The agent cannot read a job page:** save the job spec as a text file, or paste it into the command.
 - **Playwright errors:** install Node.js (see the install guide), or delete `.mcp.json`.
+- **The agent cannot run `jobdb.py`:** install Python (see the install guide). Prep sheets still work without the tracker; the agent just cannot record interviews or check which stories an interviewer has heard.

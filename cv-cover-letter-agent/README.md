@@ -100,6 +100,12 @@ output/CompanyName_RoleTitle/John_Smith_Cover_Letter_CompanyName.docx
 
 Open them, read every line, and check every figure before you send them.
 
+The script also records the application in the [job search tracker](../tracker/README.md) and prints its number. When you send the application, mark it as applied (use your own application number, and `python3` on Mac or Linux):
+
+```
+python ../tracker/jobdb.py status 3 applied
+```
+
 To stop without generating files, type `quit`.
 
 ## Troubleshooting
