@@ -1,0 +1,4 @@
+# Double-click launchers in start/: Windows needs CRLF line endings, Mac
+# needs LF. This also applies to the Download ZIP button on GitHub.
+*.bat text eol=crlf
+*.command text eol=lf

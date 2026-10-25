@@ -57,7 +57,9 @@ cp knowledge/cover_letter_style_guide.example.md knowledge/cover_letter_style_gu
 
 ## Step 2: Run the agent
 
-In the terminal, still inside the `cv-cover-letter-agent` folder:
+**The easy way:** open the `start` folder in the repo and double-click **CV and cover letter agent (Windows).bat** or **CV and cover letter agent (Mac).command**. A window opens and the agent asks you the three questions below. The first time, your computer may warn you about a downloaded file; [here is what to do](../docs/05-use-the-dashboard.md#open-the-dashboard).
+
+**Or from the terminal**, still inside the `cv-cover-letter-agent` folder:
 
 **Windows:**
 

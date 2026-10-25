@@ -2,13 +2,13 @@
 
 This guide assumes you have never used a terminal. It takes about 15 minutes.
 
-**Using ChatGPT, Gemini, Copilot or another chat tool instead?** Skip this guide and go to [Use any AI chat](04-use-any-ai-chat.md).
+**Using ChatGPT, Gemini, Copilot or another chat tool instead?** Skip this guide and go to [Use any AI chat](04-use-any-ai-chat.md). If you also want the dashboard to keep track of your applications, do steps 1 and 2 here (Python only).
 
 ## What you need
 
 | Tool | Needed for | Required? |
 |---|---|---|
-| Python 3.10 or newer | The CV and cover letter agent | Yes, for that agent |
+| Python 3.10 or newer | The CV and cover letter agent, the tracker and the dashboard | Yes, for those |
 | Claude Code | The interview prep agent, and the CV agent's login | Yes, for both agents |
 | A Claude account on a paid plan (Pro, Max, Team, Enterprise) or an Anthropic Console account | Claude Code. The free Claude plan does not include it. | Yes |
 | Python packages `claude-agent-sdk` and `python-docx` (listed in `cv-cover-letter-agent/requirements.txt`) | The CV and cover letter agent | Yes, for that agent |
@@ -24,17 +24,19 @@ A terminal is a window where you type commands.
 
 **Tip for Windows:** to open a terminal already inside a folder, open the folder in File Explorer, click the address bar at the top, type `powershell`, and press Enter.
 
-To move into a folder, use `cd` followed by the folder path. For example, if you unzipped the repo into Documents:
+**Tip for Mac:** type `cd` and a space in Terminal, drag the folder from Finder into the Terminal window, and press Enter. Terminal fills in the folder path for you.
+
+To move into a folder, use `cd` followed by the folder path. For example, if you unzipped the repo into Documents, the folder is usually called `job-search-agents-main`:
 
 ```powershell
-cd $HOME\Documents\job-search-agents
+cd $HOME\Documents\job-search-agents-main
 ```
 
 ```bash
-cd ~/Documents/job-search-agents
+cd ~/Documents/job-search-agents-main
 ```
 
-Type `dir` (Windows) or `ls` (Mac) to list what is in the current folder.
+Type `dir` (Windows) or `ls` (Mac) to list what is in the current folder. You are in the right place when you can see `README.md` and folders such as `start`, `docs` and `tracker`. Whenever a guide says "open a terminal in the repo folder", this is the folder it means.
 
 ## 2. Install Python
 
@@ -134,11 +136,14 @@ You can skip this and paste job specs in as text instead.
 
 ## You are ready
 
-Go back to the main [README](../README.md) and continue from Step 3.
+Go back to the main [README](../README.md) and continue from Step 3. From now on you can start the agents and the dashboard by double-clicking the files in the **start** folder, so you only need the terminal again for the copy commands in Step 3.
 
 ## If something goes wrong
 
 - **"command not found" or "not recognised":** close the terminal and open a new one. Installers only update your system path for new windows.
 - **PowerShell shows `'irm' is not recognized`:** you are in Command Prompt, not PowerShell. Open PowerShell instead.
 - **`externally-managed-environment` or permission errors from pip:** you ran `pip` directly. Use the `.venv` commands in step 5 instead.
+- **`cd` says the path does not exist:** the folder has a different name or is somewhere else. Use the drag-and-drop tip in step 1, or check the folder's name in File Explorer or Finder (it is often `job-search-agents-main`).
+- **Windows says "Windows protected your PC" when you double-click a file in `start`:** click **More info**, then **Run anyway**. Windows shows this for any file downloaded from the internet.
+- **Mac says a file in `start` cannot be opened or checked:** see [Open the dashboard](05-use-the-dashboard.md#mac) for how to allow it. If it still will not open, run it from Terminal instead, for example `bash "start/Dashboard (Mac).command"` from the repo folder.
 - **Anything else:** paste the exact error message into any AI chat and ask it to explain what to do. Tell it your operating system.

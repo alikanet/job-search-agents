@@ -8,19 +8,16 @@ The copy-and-paste prompts in `prompts/` do not use it.
 
 ## The dashboard
 
-The easiest way to see and change everything is the dashboard, which opens in your web browser. From the repo folder (use `python3` on Mac or Linux):
+The easiest way to see and change everything is the dashboard, which opens in your web browser. Open the `start` folder in the repo and double-click **Dashboard (Windows).bat** or **Dashboard (Mac).command**, or the **Dashboard demo** version to look around with made-up data first. [Use the dashboard](../docs/05-use-the-dashboard.md) is a step-by-step guide for first-timers.
+
+From a terminal in the repo folder instead (use `python3` on Mac or Linux):
 
 ```
 python tracker/dashboard.py
-```
-
-To look around first with made-up data, without touching your tracker:
-
-```
 python tracker/dashboard.py --demo
 ```
 
-Leave the terminal open while you use it, and press Ctrl+C there to stop it. It needs only Python and works without an internet connection.
+Leave the window open while you use it, and close it (or press Ctrl+C) to stop. It needs only Python and works without an internet connection.
 
 | Page | What it gives you |
 |---|---|
