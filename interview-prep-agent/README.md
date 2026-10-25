@@ -12,6 +12,7 @@ You need to have done these (see the main [README](../README.md)):
 
 1. Installed Claude Code and logged in: [install guide](../docs/01-install-prerequisites.md)
 2. Built your career history and style guides in `../cv-cover-letter-agent/knowledge/`: [career history guide](../docs/02-build-your-career-history.md) and [voice and style guide](../docs/03-set-your-voice-and-style.md)
+3. Installed Python (step 2 of the [install guide](../docs/01-install-prerequisites.md)), so the agent can keep your tracker up to date. Prep sheets still work without it.
 
 **This agent has no data of its own.** It works only from the files you create below. If they are thin, the sheets will be generic.
 
@@ -68,7 +69,9 @@ Check CLAUDE.md and story_bank.md for any remaining [PLACEHOLDER], [TO ADD] or t
 
 ## Step 2: Start Claude Code in this folder
 
-In the terminal, inside the `interview-prep-agent` folder:
+**The easy way:** open the `start` folder in the repo and double-click **Interview prep agent (Windows).bat** or **Interview prep agent (Mac).command**. It opens Claude Code in the right folder, ready for `/prep` and `/debrief`. The first time, your computer may warn you about a downloaded file; [here is what to do](../docs/05-use-the-dashboard.md#open-the-dashboard).
+
+**Or from the terminal**, inside the `interview-prep-agent` folder:
 
 ```
 claude

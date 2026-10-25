@@ -55,6 +55,10 @@ The assistant will research the company, check your experience against the job s
 
 Copy the result into a Word or Google Docs file. For a CV, use a plain single-column layout, no tables or text boxes, so application tracking systems can read it.
 
+## Step 6 (optional): Keep track in the dashboard
+
+On this route nothing records your applications for you, but you can still use the dashboard to keep track of them by hand: what you sent, where each one stands, your interviews and what is working. It needs Python only (step 2 of [Install the prerequisites](01-install-prerequisites.md)). Then follow [Use the dashboard](05-use-the-dashboard.md).
+
 ## Using a coding assistant instead
 
 Some command-line AI tools, such as OpenAI's Codex CLI or Google's Gemini CLI, read an instruction file from your project folder in the same way Claude Code reads `CLAUDE.md`. The file name differs by tool (check your tool's documentation). To use the interview prep agent this way, copy the contents of `interview-prep-agent/CLAUDE.md` and `.claude/skills/prep/SKILL.md` into your tool's instruction file or prompt. This is not tested here, so treat it as a starting point.
