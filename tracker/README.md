@@ -6,6 +6,35 @@ It is one file, `tracker/job_search.db`, created automatically the first time an
 
 The copy-and-paste prompts in `prompts/` do not use it.
 
+## The dashboard
+
+The easiest way to see and change everything is the dashboard, which opens in your web browser. From the repo folder (use `python3` on Mac or Linux):
+
+```
+python tracker/dashboard.py
+```
+
+To look around first with made-up data, without touching your tracker:
+
+```
+python tracker/dashboard.py --demo
+```
+
+Leave the terminal open while you use it, and press Ctrl+C there to stop it. It needs only Python and works without an internet connection.
+
+| Page | What it gives you |
+|---|---|
+| Today | What to do next, most urgent first: interviews to prepare for or debrief, applications to follow up or give up on, drafts sitting unsent, stories that keep landing badly. Plus upcoming interviews, your key numbers and recent changes. |
+| Applications | Every application as a table or a board. Search, filter by status, change any status (one at a time, several at once, or by dragging a card), and add new ones. |
+| An application's page | Its status and history, how it compares with the rest of your search, its interviews (with interviewers, questions, stories used and outcomes, all editable), links to your CV, cover letter, prep sheets and debriefs, and buttons to mark it sent, reapply, edit or delete. |
+| What's working | The funnel from sent to offer, which kinds of application get more interviews (source, tailored CV, advertised salary, how quickly you sent it), reply times, pass rates by interview stage, which stories land, and which questions you are asked most. |
+| Compare | Pick two applications and see why one got further, with how much each difference has mattered across your whole search. |
+| Help | What the statuses and numbers mean and where each piece of advice comes from. |
+
+Patterns are only reported once each group has at least 3 sent applications, and small numbers are labelled as early signals, so a lucky week is not presented as a rule.
+
+The dashboard only listens on your own computer, and each run uses a fresh secret that the page sends with every request, so other websites open in your browser cannot read or change your tracker. **Download as spreadsheet (CSV)** in the sidebar exports every application.
+
 ## How it fills itself in
 
 | When | What is recorded | By |
@@ -17,9 +46,9 @@ The copy-and-paste prompts in `prompts/` do not use it.
 
 `/prep` uses it to avoid telling an interviewer a story they have already heard.
 
-## Using it yourself
+## Using it from the terminal
 
-Open a terminal in the repo folder. On Mac or Linux, use `python3` instead of `python`.
+Everything the dashboard does is also available as commands, which is also how Claude Code reads and updates the tracker. Open a terminal in the repo folder. On Mac or Linux, use `python3` instead of `python`.
 
 ```
 python tracker/jobdb.py list                          all applications, newest first
@@ -27,6 +56,8 @@ python tracker/jobdb.py list --status interviewing    only those at one status
 python tracker/jobdb.py show 3                        one application with its interviews
 python tracker/jobdb.py show --company "Example"      everything at one company
 python tracker/jobdb.py status 3 applied              mark application 3 as sent today
+python tracker/jobdb.py reapply 3                     start a new application for the same role
+python tracker/jobdb.py delete 3 --yes                delete application 3 and its interviews
 python tracker/jobdb.py stories-told --company "Example"
 python tracker/jobdb.py --help                        every command
 ```

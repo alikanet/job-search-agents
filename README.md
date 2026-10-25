@@ -85,7 +85,9 @@ tracker/                        Database of your applications and interviews, sh
 
 ## Tracking applications and interviews
 
-Both agents record what they do in a small database on your computer (`tracker/job_search.db`): each application and its status, each interview, who interviewed you, what they asked, and which stories you told. The interview prep agent uses it so it never tells an interviewer the same story twice. See the [tracker README](tracker/README.md) to list your applications or update them yourself.
+Both agents record what they do in a small database on your computer (`tracker/job_search.db`): each application and its status, each interview, who interviewed you, what they asked, and which stories you told. The interview prep agent uses it so it never tells an interviewer the same story twice.
+
+To see it all in your web browser, with what to do next, what is working, and controls to change any application, run `python tracker/dashboard.py` from the repo folder (`python3` on Mac or Linux). Add `--demo` to try it with made-up data first. See the [tracker README](tracker/README.md) for more.
 
 ## Privacy
 

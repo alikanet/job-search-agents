@@ -54,6 +54,12 @@ def connect(path=DEFAULT_DB):
     conn.execute("PRAGMA foreign_keys = ON")
     with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         conn.executescript(f.read())
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(applications)")}
+    if "reapplied_from" not in columns:  # a database made before reapplying existed
+        conn.execute(
+            "ALTER TABLE applications ADD COLUMN reapplied_from INTEGER REFERENCES applications(id) ON DELETE SET NULL"
+        )
+        conn.commit()
     return conn
 
 
@@ -78,11 +84,113 @@ def require(conn, table, row_id):
     return row
 
 
-def update_row(conn, table, row_id, values):
-    values = {k: v for k, v in values.items() if v is not None}
+def update_row(conn, table, row_id, values, skip_none=True):
+    """skip_none leaves a column alone when its value is None (an option the
+    user did not give). Without it, None clears the column."""
+    if skip_none:
+        values = {k: v for k, v in values.items() if v is not None}
     if values:
         assignments = ", ".join(f"{column} = ?" for column in values)
         conn.execute(f"UPDATE {table} SET {assignments} WHERE id = ?", (*values.values(), row_id))
+
+
+def insert_row(conn, table, values):
+    values = {k: v for k, v in values.items() if v is not None}
+    return conn.execute(
+        f"INSERT INTO {table} ({', '.join(values)}) VALUES ({', '.join('?' * len(values))})",
+        tuple(values.values()),
+    ).lastrowid
+
+
+def log_status(conn, app_id, status, on=None):
+    conn.execute(
+        "INSERT INTO status_history (application_id, status, changed_on) VALUES (?, ?, ?)",
+        (app_id, status, on or date.today().isoformat()),
+    )
+
+
+def set_status(conn, app_id, status, on=None):
+    """Change an application's status and log the change. on is the date it
+    happened (default today). Marking it applied also fills in applied_on,
+    keeping an earlier date unless on is given."""
+    row = conn.execute("SELECT status, applied_on FROM applications WHERE id = ?", (app_id,)).fetchone()
+    values = {"status": status}
+    if status == "applied":
+        values["applied_on"] = on or row["applied_on"] or date.today().isoformat()
+    update_row(conn, "applications", app_id, values)
+    if row["status"] != status:
+        log_status(conn, app_id, status, on)
+
+
+def create_application(conn, company, values, website=None):
+    """values are keyed by column name. Returns the new application's id."""
+    values = {k: v for k, v in values.items() if v is not None}
+    values.setdefault("status", "drafting")
+    if values["status"] == "applied":
+        values.setdefault("applied_on", date.today().isoformat())
+    with conn:
+        values["company_id"] = get_or_create_company(conn, company, website)
+        app_id = insert_row(conn, "applications", values)
+        log_status(conn, app_id, values["status"], values.get("applied_on") if values["status"] == "applied" else None)
+    return app_id
+
+
+def edit_application(conn, app_id, values, website=None, skip_none=True):
+    """values are keyed by column name. A status change goes through
+    set_status, so it is logged."""
+    values = dict(values)
+    status = values.pop("status", None)
+    with conn:
+        update_row(conn, "applications", app_id, values, skip_none)
+        if status:
+            set_status(conn, app_id, status, values.get("applied_on"))
+        if website:
+            conn.execute(
+                "UPDATE companies SET website = ? WHERE id = (SELECT company_id FROM applications WHERE id = ?)",
+                (website, app_id),
+            )
+
+
+def create_interview(conn, app_id, values, interviewers=()):
+    """Adding an interview moves a drafting or applied application to
+    interviewing, dated by the interview if it has already happened."""
+    values = dict(values, application_id=app_id)
+    with conn:
+        interview_id = insert_row(conn, "interviews", values)
+        add_interviewers(conn, interview_id, interviewers)
+        status = conn.execute("SELECT status FROM applications WHERE id = ?", (app_id,)).fetchone()["status"]
+        if status in ("drafting", "applied"):
+            today = date.today().isoformat()
+            scheduled = (values.get("scheduled_at") or today)[:10]
+            set_status(conn, app_id, "interviewing", min(scheduled, today))
+    return interview_id
+
+
+def edit_interview(conn, interview_id, values, interviewers=(), skip_none=True):
+    """An outcome of offer, rejected or withdrew also sets the application's
+    status."""
+    application_id = conn.execute(
+        "SELECT application_id FROM interviews WHERE id = ?", (interview_id,)
+    ).fetchone()["application_id"]
+    with conn:
+        update_row(conn, "interviews", interview_id, values, skip_none)
+        add_interviewers(conn, interview_id, interviewers)
+        if values.get("outcome") in OUTCOME_TO_STATUS:
+            set_status(conn, application_id, OUTCOME_TO_STATUS[values["outcome"]])
+
+
+def reapply(conn, app_id):
+    """Start a new application for the same company and role, linked to the
+    old one, as a draft. Returns the new application's id."""
+    with conn:
+        new_id = conn.execute(
+            "INSERT INTO applications (company_id, role_title, job_url, job_spec, source, salary_min, salary_max, "
+            "salary_currency, reapplied_from) SELECT company_id, role_title, job_url, job_spec, source, salary_min, "
+            "salary_max, salary_currency, id FROM applications WHERE id = ?",
+            (app_id,),
+        ).lastrowid
+        log_status(conn, new_id, "drafting")
+    return new_id
 
 
 def get_or_create_company(conn, name, website=None):
@@ -139,6 +247,7 @@ def record_draft(conn, company, role, website, job_spec, output_dir):
             "INSERT INTO applications (company_id, role_title, job_spec, output_dir) VALUES (?, ?, ?, ?)",
             (company_id, role, job_spec, repo_path(output_dir)),
         ).lastrowid
+        log_status(conn, app_id, "drafting")
         return app_id, True
 
 
@@ -168,6 +277,7 @@ def print_application(conn, app):
         ("Advertised salary", salary),
         ("Drafts", app["output_dir"]),
         ("Notes", app["notes"]),
+        ("Reapplication of", f"application #{app['reapplied_from']}" if app["reapplied_from"] else None),
     ]
     for label, value in details:
         if value:
@@ -230,36 +340,39 @@ def application_values(args):
 
 
 def cmd_add_application(conn, args):
-    values = application_values(args)
-    if values["status"] == "applied" and not values["applied_on"]:
-        values["applied_on"] = date.today().isoformat()
-    values = {k: v for k, v in values.items() if v is not None}
-    with conn:
-        values["company_id"] = get_or_create_company(conn, args.company, args.website)
-        app_id = conn.execute(
-            f"INSERT INTO applications ({', '.join(values)}) VALUES ({', '.join('?' * len(values))})",
-            tuple(values.values()),
-        ).lastrowid
+    app_id = create_application(conn, args.company, application_values(args), args.website)
     print(f"Application #{app_id}: {args.role} at {args.company}")
 
 
 def cmd_update_application(conn, args):
     app = require(conn, "applications", args.id)
-    with conn:
-        update_row(conn, "applications", app["id"], application_values(args))
-        if args.website:
-            conn.execute("UPDATE companies SET website = ? WHERE id = ?", (args.website, app["company_id"]))
+    edit_application(conn, app["id"], application_values(args), args.website)
     print(f"Updated application #{app['id']}")
 
 
 def cmd_status(conn, args):
     app = require(conn, "applications", args.id)
-    values = {"status": args.status}
-    if args.status == "applied":
-        values["applied_on"] = args.date or app["applied_on"] or date.today().isoformat()
     with conn:
-        update_row(conn, "applications", app["id"], values)
+        set_status(conn, app["id"], args.status, args.date)
     print(f"Application #{app['id']} is now {args.status}")
+
+
+def cmd_reapply(conn, args):
+    app = require(conn, "applications", args.id)
+    new_id = reapply(conn, app["id"])
+    print(f"Application #{new_id} started as a reapplication of #{app['id']}")
+
+
+def cmd_delete(conn, args):
+    app = require(conn, "applications", args.id)
+    if not args.yes:
+        raise SystemExit(
+            f"This permanently deletes application #{app['id']} with its interviews and questions. "
+            f"Run it again with --yes to confirm."
+        )
+    with conn:
+        conn.execute("DELETE FROM applications WHERE id = ?", (app["id"],))
+    print(f"Deleted application #{app['id']}")
 
 
 def interview_values(args):
@@ -274,18 +387,7 @@ def interview_values(args):
 
 def cmd_add_interview(conn, args):
     app = require(conn, "applications", args.application_id)
-    values = {k: v for k, v in interview_values(args).items() if v is not None}
-    values["application_id"] = app["id"]
-    with conn:
-        interview_id = conn.execute(
-            f"INSERT INTO interviews ({', '.join(values)}) VALUES ({', '.join('?' * len(values))})",
-            tuple(values.values()),
-        ).lastrowid
-        add_interviewers(conn, interview_id, args.interviewer)
-        conn.execute(
-            "UPDATE applications SET status = 'interviewing' WHERE id = ? AND status IN ('drafting', 'applied')",
-            (app["id"],),
-        )
+    interview_id = create_interview(conn, app["id"], interview_values(args), args.interviewer)
     print(f"Interview #{interview_id} added to application #{app['id']}")
 
 
@@ -293,11 +395,7 @@ def cmd_update_interview(conn, args):
     interview = require(conn, "interviews", args.id)
     values = interview_values(args)
     values.update(debrief=repo_path(args.debrief), feeling=args.feeling, outcome=args.outcome)
-    with conn:
-        update_row(conn, "interviews", interview["id"], values)
-        add_interviewers(conn, interview["id"], args.interviewer)
-        if args.outcome in OUTCOME_TO_STATUS:
-            update_row(conn, "applications", interview["application_id"], {"status": OUTCOME_TO_STATUS[args.outcome]})
+    edit_interview(conn, interview["id"], values, args.interviewer)
     print(f"Updated interview #{interview['id']}")
 
 
@@ -450,6 +548,15 @@ def build_parser():
     p.add_argument("status", choices=STATUSES)
     p.add_argument("--date", type=iso_date, help="date applied, if not today (only used for 'applied')")
     p.set_defaults(func=cmd_status)
+
+    p = sub.add_parser("reapply", help="start a new application for the same company and role")
+    p.add_argument("id", type=int, help="the earlier application's number")
+    p.set_defaults(func=cmd_reapply)
+
+    p = sub.add_parser("delete", help="permanently delete an application and its interviews")
+    p.add_argument("id", type=int)
+    p.add_argument("--yes", action="store_true", help="confirm the deletion")
+    p.set_defaults(func=cmd_delete)
 
     p = sub.add_parser("add-interview", help="record an interview for an application")
     p.add_argument("application_id", type=int)

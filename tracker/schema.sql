@@ -27,7 +27,17 @@ CREATE TABLE IF NOT EXISTS applications (
   salary_max      INTEGER,
   salary_currency TEXT,
   output_dir      TEXT,             -- where the CV agent saved the drafts
-  notes           TEXT
+  notes           TEXT,
+  reapplied_from  INTEGER REFERENCES applications(id) ON DELETE SET NULL
+);
+
+-- Every status change, with the date it happened, for the time-based stats
+-- in the dashboard (how long replies take, how long things sit).
+CREATE TABLE IF NOT EXISTS status_history (
+  id              INTEGER PRIMARY KEY,
+  application_id  INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+  status          TEXT NOT NULL,
+  changed_on      TEXT NOT NULL     -- YYYY-MM-DD
 );
 
 CREATE TABLE IF NOT EXISTS interviews (

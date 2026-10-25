@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="tracker-token" content="{{TOKEN}}">
+<title>Job search</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <nav class="rail" aria-label="Main">
+    <a class="brand" href="#/">Job search</a>
+    <ul class="nav">
+      <li><a href="#/" data-nav="overview">Today</a></li>
+      <li><a href="#/applications" data-nav="applications">Applications</a></li>
+      <li><a href="#/analytics" data-nav="analytics">What's working</a></li>
+      <li><a href="#/compare" data-nav="compare">Compare</a></li>
+      <li><a href="#/help" data-nav="help">Help</a></li>
+    </ul>
+    <div class="rail-actions">
+      <button type="button" class="button primary" data-action="new-application">Add application</button>
+      <a class="quiet-link" id="export-link" href="#" download>Download as spreadsheet (CSV)</a>
+    </div>
+    <p class="rail-foot" id="source-label"></p>
+  </nav>
+  <main id="main" tabindex="-1">
+    <p class="loading">Loading your search</p>
+  </main>
+</div>
+<div id="tooltip" role="tooltip" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+</body>
+</html>
