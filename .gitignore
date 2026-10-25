@@ -10,6 +10,8 @@ interview-prep-agent/story_bank.md
 interview-prep-agent/exit_answer.md
 interview-prep-agent/.mcp.json
 *.local.json
+# The job search tracker holds interviewers' names and the job specs you applied to.
+tracker/job_search.db*
 
 # Generated documents and secrets
 *.docx
@@ -17,3 +19,4 @@ interview-prep-agent/.mcp.json
 .env
 *.token
 __pycache__/
+.venv/

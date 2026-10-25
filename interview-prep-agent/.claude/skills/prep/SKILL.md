@@ -23,6 +23,21 @@ If 1 to 4 are missing from the details above, ask for them before doing any work
 
 ---
 
+## Tracking (job search database)
+
+The repo keeps a small database of applications and interviews in `../tracker/`. Below, `jobdb.py` is short for `python ../tracker/jobdb.py` run from this folder (`python3` on Mac or Linux). If Python is not available, skip this section and say so in your reply.
+
+Before choosing stories:
+
+1. Run `jobdb.py show --company "<Company>"` to see any earlier applications, interviews, interviewers and questions at this company.
+2. Run `jobdb.py stories-told --company "<Company>"` to see which stories each interviewer there has already heard.
+3. Find the application for this role in the `show` output. If there is none, or only a rejected, withdrawn or ghosted one, add it: `jobdb.py add-application --company "<Company>" --role "<Role>" --website <URL> --status interviewing`. Save the job spec with it: `--job-spec-file <file>` if it is a file, or `--job-spec-file -` with the pasted text on standard input.
+4. If that application already has an interview at this stage whose outcome is empty or `pending`, reuse it with `update-interview`. Otherwise add one: `jobdb.py add-interview <application number> --stage <stage> --format <format> --length <minutes>`, plus `--scheduled-at YYYY-MM-DD` if you know the date and one `--interviewer "Name, Title"` per interviewer the user named. Stages are `recruiter_screen`, `hiring_manager`, `panel`, `case_study` (including presentations) and `final` (including executive rounds).
+
+After saving the PDF, run `jobdb.py update-interview <interview number> --prep-sheet output/<file name>.pdf`.
+
+---
+
 ## Research (web search)
 
 Beyond the company URL and job spec, search for:
@@ -68,6 +83,7 @@ Rules:
 - Each has a headline metric from the fact sheet.
 - One or two lines per story: the requirement, the story, the result. Add a short reminder of the story bank entry to open with.
 - Choose the three that best cover the role's most important requirements. Do not repeat the same employer three times unless the spec demands it.
+- Never choose a story that `stories-told` shows one of this interview's interviewers has already heard. If the interviewers are unknown, prefer stories this company has not heard yet.
 
 **2. Likely questions with scripted openers**
 - 5 to 6 questions the interviewer is most likely to ask at this stage, based on the job spec, the company and the stage.
@@ -117,4 +133,4 @@ If the sheet exceeds 2 pages, cut content, never shrink text below a readable si
 2. Check every company fact has a source or is marked [unverified].
 3. Check openers contain no em dashes or en dashes, no hedging language, and none of the items CLAUDE.md says to keep out of openers.
 4. Check the PDF is 2 pages or fewer and readable at normal print size. If a salary floor exists, check the salary section flags anything below it and that the floor appears only as a private comparison note, never inside the suggested spoken answer.
-5. Reply with the file path, a one line list of anything marked [unverified], and any weak story fits from the honesty rules in CLAUDE.md.
+5. Reply with the file path, a one line list of anything marked [unverified], any weak story fits from the honesty rules in CLAUDE.md, the interview number in the tracker, and which stories this company has already heard.

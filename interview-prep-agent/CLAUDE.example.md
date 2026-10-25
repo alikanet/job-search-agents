@@ -29,6 +29,7 @@ Read these files from the project folder. Treat them as the user's own material.
 | `knowledge/cover_letter_style_guide.md` | Voice rules for scripted answer openers |
 | `exit_answer.md` | Your agreed answer on leaving your last role, and your agreed reference (delete this row if not needed) |
 | `debriefs/` folder (files made from `debrief_template.md`) | Notes saved after each interview. Read every file for the same company, plus any from the last 90 days. Use them to sharpen likely questions, avoid repeating a story with the same interviewer, and follow up on feedback. |
+| Job search tracker (`../tracker/job_search.db`, used only through `python ../tracker/jobdb.py`) | Applications, interviews, interviewers, questions asked and which stories each interviewer has heard. The `/prep` and `/debrief` skills explain how to read and update it. It holds no career facts. |
 
 Never rely on memory of the user's career. If a fact is not in these files, do not use it.
 

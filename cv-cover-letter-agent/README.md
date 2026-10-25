@@ -62,16 +62,16 @@ In the terminal, still inside the `cv-cover-letter-agent` folder:
 **Windows:**
 
 ```powershell
-python tailor_application.py
+.venv\Scripts\python tailor_application.py
 ```
 
 **Mac or Linux:**
 
 ```bash
-python3 tailor_application.py
+.venv/bin/python tailor_application.py
 ```
 
-On Windows, if `python` is not recognised, use `py tailor_application.py`.
+These use the private Python environment from step 5 of the [install guide](../docs/01-install-prerequisites.md). If `.venv` does not exist yet, do that step first.
 
 The script asks you three things:
 
@@ -100,6 +100,12 @@ output/CompanyName_RoleTitle/John_Smith_Cover_Letter_CompanyName.docx
 
 Open them, read every line, and check every figure before you send them.
 
+The script also records the application in the [job search tracker](../tracker/README.md) and prints its number. When you send the application, mark it as applied (use your own application number, and `python3` on Mac or Linux):
+
+```
+python ../tracker/jobdb.py status 3 applied
+```
+
 To stop without generating files, type `quit`.
 
 ## Troubleshooting
@@ -108,4 +114,4 @@ To stop without generating files, type `quit`.
 - **"still contains the example details":** open `profile.json` and replace the example email and name with your own.
 - **"still marked (TEMPLATE)":** finish editing the style guide, then delete `(TEMPLATE)` from its first line.
 - **Login or authentication error:** run `claude` once and sign in. See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/agent-sdk/python) if it persists.
-- **`ModuleNotFoundError`:** run `pip install claude-agent-sdk python-docx` again (see the install guide).
+- **`ModuleNotFoundError`, or `.venv` not found:** run the package install commands in step 5 of the [install guide](../docs/01-install-prerequisites.md) again.
